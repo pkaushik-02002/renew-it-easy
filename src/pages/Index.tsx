@@ -1,13 +1,40 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React, { useState } from 'react';
+import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
+import Navigation from '@/components/Navigation';
+import Dashboard from '@/components/Dashboard';
+import SubscriptionList from '@/components/SubscriptionList';
+import Insights from '@/components/Insights';
+import UpcomingRenewals from '@/components/UpcomingRenewals';
 
 const Index = () => {
+  const [activeTab, setActiveTab] = useState('dashboard');
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return <Dashboard />;
+      case 'subscriptions':
+        return <SubscriptionList />;
+      case 'insights':
+        return <Insights />;
+      case 'renewals':
+        return <UpcomingRenewals />;
+      default:
+        return <Dashboard />;
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <SubscriptionProvider>
+      <div className="min-h-screen bg-gray-50">
+        <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
+        
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+          {renderContent()}
+        </main>
       </div>
-    </div>
+    </SubscriptionProvider>
   );
 };
 
