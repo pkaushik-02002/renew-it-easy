@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useSubscriptions } from '@/contexts/SubscriptionContext';
-import { Plus, Calendar, DollarSign } from 'lucide-react';
+import { Plus, Calendar, DollarSign, CreditCard } from 'lucide-react';
 import AddSubscriptionModal from './AddSubscriptionModal';
 
 const SubscriptionList = () => {

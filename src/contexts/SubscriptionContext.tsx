@@ -1,5 +1,18 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { 
+  collection, 
+  addDoc, 
+  updateDoc, 
+  deleteDoc, 
+  doc, 
+  onSnapshot, 
+  query, 
+  where, 
+  orderBy 
+} from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { useAuth } from './AuthContext';
 
 export interface Subscription {
   id: string;
@@ -10,15 +23,17 @@ export interface Subscription {
   nextBilling: string;
   description?: string;
   color: string;
+  userId: string;
 }
 
 interface SubscriptionContextType {
   subscriptions: Subscription[];
-  addSubscription: (subscription: Omit<Subscription, 'id'>) => void;
-  updateSubscription: (id: string, subscription: Partial<Subscription>) => void;
-  deleteSubscription: (id: string) => void;
+  addSubscription: (subscription: Omit<Subscription, 'id' | 'userId'>) => Promise<void>;
+  updateSubscription: (id: string, subscription: Partial<Subscription>) => Promise<void>;
+  deleteSubscription: (id: string) => Promise<void>;
   monthlyBudget: number;
   setMonthlyBudget: (budget: number) => void;
+  loading: boolean;
 }
 
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
@@ -31,89 +46,59 @@ const CATEGORY_COLORS = {
   Other: '#8b5cf6'
 };
 
-const generateId = () => Math.random().toString(36).substr(2, 9);
-
-const SAMPLE_SUBSCRIPTIONS: Subscription[] = [
-  {
-    id: '1',
-    name: 'Netflix',
-    cost: 15.99,
-    billingCycle: 'monthly',
-    category: 'Entertainment',
-    nextBilling: '2025-08-05',
-    description: 'Streaming service',
-    color: CATEGORY_COLORS.Entertainment
-  },
-  {
-    id: '2', 
-    name: 'Spotify Premium',
-    cost: 9.99,
-    billingCycle: 'monthly',
-    category: 'Entertainment',
-    nextBilling: '2025-07-15',
-    description: 'Music streaming',
-    color: CATEGORY_COLORS.Entertainment
-  },
-  {
-    id: '3',
-    name: 'Adobe Creative Suite',
-    cost: 52.99,
-    billingCycle: 'monthly',
-    category: 'Productivity',
-    nextBilling: '2025-07-28',
-    description: 'Design software',
-    color: CATEGORY_COLORS.Productivity
-  }
-];
-
 export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [monthlyBudget, setMonthlyBudget] = useState<number>(200);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
-    const saved = localStorage.getItem('subscriptions');
-    const savedBudget = localStorage.getItem('monthlyBudget');
-    
-    if (saved) {
-      setSubscriptions(JSON.parse(saved));
-    } else {
-      setSubscriptions(SAMPLE_SUBSCRIPTIONS);
+    if (!user) {
+      setSubscriptions([]);
+      setLoading(false);
+      return;
     }
+
+    const q = query(
+      collection(db, 'subscriptions'),
+      where('userId', '==', user.uid),
+      orderBy('nextBilling', 'asc')
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const subs = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Subscription[];
+      setSubscriptions(subs);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [user]);
+
+  const addSubscription = async (subscription: Omit<Subscription, 'id' | 'userId'>) => {
+    if (!user) return;
     
-    if (savedBudget) {
-      setMonthlyBudget(Number(savedBudget));
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('subscriptions', JSON.stringify(subscriptions));
-  }, [subscriptions]);
-
-  useEffect(() => {
-    localStorage.setItem('monthlyBudget', monthlyBudget.toString());
-  }, [monthlyBudget]);
-
-  const addSubscription = (subscription: Omit<Subscription, 'id'>) => {
-    const newSubscription: Subscription = {
+    const newSubscription = {
       ...subscription,
-      id: generateId(),
+      userId: user.uid,
       color: CATEGORY_COLORS[subscription.category]
     };
-    setSubscriptions(prev => [...prev, newSubscription]);
+    
+    await addDoc(collection(db, 'subscriptions'), newSubscription);
   };
 
-  const updateSubscription = (id: string, updates: Partial<Subscription>) => {
-    setSubscriptions(prev => 
-      prev.map(sub => 
-        sub.id === id 
-          ? { ...sub, ...updates, color: updates.category ? CATEGORY_COLORS[updates.category] : sub.color }
-          : sub
-      )
-    );
+  const updateSubscription = async (id: string, updates: Partial<Subscription>) => {
+    const docRef = doc(db, 'subscriptions', id);
+    const updatedData = updates.category ? 
+      { ...updates, color: CATEGORY_COLORS[updates.category] } : 
+      updates;
+    await updateDoc(docRef, updatedData);
   };
 
-  const deleteSubscription = (id: string) => {
-    setSubscriptions(prev => prev.filter(sub => sub.id !== id));
+  const deleteSubscription = async (id: string) => {
+    await deleteDoc(doc(db, 'subscriptions', id));
   };
 
   return (
@@ -123,7 +108,8 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
       updateSubscription,
       deleteSubscription,
       monthlyBudget,
-      setMonthlyBudget
+      setMonthlyBudget,
+      loading
     }}>
       {children}
     </SubscriptionContext.Provider>
