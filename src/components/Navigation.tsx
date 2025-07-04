@@ -34,16 +34,16 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab }) => {
   };
 
   return (
-    <nav className="glass border-b border-border/30 mb-4 md:mb-8 sticky top-0 z-50">
+    <nav className="glass border-b border-border/30 sticky top-0 z-50 mb-4 md:mb-6">
       <div className="container-premium">
-        <div className="flex items-center justify-between h-16 md:h-18">
+        <div className="flex items-center justify-between h-14 md:h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 md:w-12 md:h-12 gradient-primary rounded-xl flex items-center justify-center shadow-glow">
-              <DollarSign className="h-5 w-5 md:h-6 md:w-6 text-primary-foreground" />
+          <div className="flex items-center space-x-2 md:space-x-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 gradient-primary rounded-xl flex items-center justify-center shadow-glow">
+              <DollarSign className="h-4 w-4 md:h-5 md:w-5 text-primary-foreground" />
             </div>
             <div className="hidden xs:block">
-              <h1 className="text-lg md:text-xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-base md:text-lg font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
                 SubTracker
               </h1>
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -54,8 +54,8 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab }) => {
           </div>
           
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-2">
-            <div className="glass-card rounded-xl p-1 space-x-1">
+          <div className="hidden lg:flex items-center space-x-1">
+            <div className="glass-card rounded-xl p-1 flex space-x-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -64,7 +64,7 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab }) => {
                     variant="ghost"
                     size="sm"
                     onClick={() => setActiveTab(item.id)}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-smooth ${
+                    className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-smooth text-sm ${
                       activeTab === item.id 
                         ? 'gradient-primary text-primary-foreground shadow-lg' 
                         : 'hover:bg-accent/80'
@@ -79,21 +79,21 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab }) => {
           </div>
 
           {/* User Menu & Mobile Toggle */}
-          <div className="flex items-center space-x-2 md:space-x-3">
-            {/* User Info */}
-            <div className="hidden sm:flex items-center space-x-2 px-3 py-2 glass-card rounded-lg">
+          <div className="flex items-center space-x-2">
+            {/* User Info - Hidden on small screens */}
+            <div className="hidden md:flex items-center space-x-2 px-3 py-2 glass-card rounded-lg">
               <User className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium truncate max-w-[120px]">
+              <span className="text-sm font-medium truncate max-w-[100px] lg:max-w-[150px]">
                 {user?.displayName || user?.email?.split('@')[0] || 'User'}
               </span>
             </div>
             
-            {/* Logout Button */}
+            {/* Logout Button - Hidden on mobile */}
             <Button
               variant="outline"
               size="sm"
               onClick={handleLogout}
-              className="hidden sm:flex glass hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-smooth"
+              className="hidden md:flex glass hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-smooth"
             >
               <LogOut className="h-4 w-4" />
             </Button>
@@ -112,8 +112,8 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab }) => {
 
         {/* Mobile Navigation Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-border/30 py-4 animate-fade-in">
-            <div className="space-y-2">
+          <div className="lg:hidden border-t border-border/30 py-3 animate-fade-in">
+            <div className="space-y-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -121,7 +121,7 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab }) => {
                     key={item.id}
                     variant="ghost"
                     onClick={() => handleNavClick(item.id)}
-                    className={`w-full justify-start px-4 py-3 transition-smooth ${
+                    className={`w-full justify-start px-3 py-2.5 transition-smooth ${
                       activeTab === item.id 
                         ? 'gradient-primary text-primary-foreground' 
                         : 'hover:bg-accent/80'
@@ -135,16 +135,16 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab }) => {
               
               {/* Mobile User Info & Logout */}
               <div className="pt-2 mt-2 border-t border-border/30 space-y-2">
-                <div className="flex items-center space-x-3 px-4 py-2 glass-card rounded-lg">
+                <div className="flex items-center space-x-3 px-3 py-2 glass-card rounded-lg">
                   <User className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">
+                  <span className="text-sm font-medium truncate">
                     {user?.displayName || user?.email?.split('@')[0] || 'User'}
                   </span>
                 </div>
                 <Button
                   variant="outline"
                   onClick={handleLogout}
-                  className="w-full justify-start px-4 py-3 glass hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-smooth"
+                  className="w-full justify-start px-3 py-2.5 glass hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-smooth"
                 >
                   <LogOut className="h-4 w-4 mr-3" />
                   <span>Sign Out</span>
