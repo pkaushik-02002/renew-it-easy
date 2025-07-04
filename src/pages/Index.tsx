@@ -8,6 +8,7 @@ import SubscriptionList from '@/components/SubscriptionList';
 import Insights from '@/components/Insights';
 import UpcomingRenewals from '@/components/UpcomingRenewals';
 import AuthCard from '@/components/AuthCard';
+import { DollarSign } from 'lucide-react';
 
 const AppContent = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -30,8 +31,14 @@ const AppContent = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen gradient-surface flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-glow animate-pulse">
+            <DollarSign className="h-8 w-8 text-primary-foreground" />
+          </div>
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent mx-auto"></div>
+          <p className="text-muted-foreground mt-4">Loading your dashboard...</p>
+        </div>
       </div>
     );
   }
@@ -42,11 +49,13 @@ const AppContent = () => {
 
   return (
     <SubscriptionProvider>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      <div className="min-h-screen gradient-surface">
         <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
         
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-          {renderContent()}
+        <main className="container-premium pb-12 md:pb-20">
+          <div className="animate-fade-in">
+            {renderContent()}
+          </div>
         </main>
       </div>
     </SubscriptionProvider>
